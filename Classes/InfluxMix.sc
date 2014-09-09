@@ -5,9 +5,10 @@ InfluxMix : InfluxBase {
 	var <trusts, <>mergeFunc, <>damping = 0.5;
 
 	*initClass {
-		Class.initClassTree(Halo);
 		Class.initClassTree(Spec);
-		this.addSpec(\damping, [0, 1]);
+	//	Class.initClassTree(Halo);
+	//	this.addSpec(\damping, [0, 1]);
+		Spec.add(\damping, [0, 1]);
 
 		// damping 0 is linear sum of contribs,
 		// damping 0.5 is scaled by sqrt of contribs (equal power sum)
