@@ -91,14 +91,16 @@ InfluxBase {
 	// x.putHalo(\key, <myName>);
 	key { ^this.getHalo(\key) ? 'anonIB' }
 
+	resetInvals {
+		this.set(*inNames.collect([_, 0]).flat);
+	}
+
 	prepInvals {
-		if (inValDict.isNil) {
-			inValDict = ();
-			inNames.do { |name|
-				if (inValDict[name].isNil) {
-					inValDict[name] = 0;
-				}
-			};
+		inValDict = inValDict ?? { () };
+		inNames.do { |name|
+			if (inValDict[name].isNil) {
+				inValDict[name] = 0;
+			}
 		};
 	}
 
@@ -227,7 +229,7 @@ InfluxBase {
 
 Influx :InfluxBase {
 	var <weights, <presets;
-	var <>outOffsets, <>inScaler = 1;
+	var <outOffsets, <>inScaler = 1;
 
 	*new { |ins = 2, outs = 8, vals, weights|
 		ins = this.makeInNames(ins);
@@ -380,12 +382,25 @@ Influx :InfluxBase {
 		if (pre.notNil) { this.setw(pre) };
 	}
 
+	outOffsets_ { |newOffs|
+		var insize = newOffs.size, offsize = outOffsets.size;
+		if (insize < offsize) {
+			newOffs = newOffs ++ 0.dup(offsize - insize);
+		} {
+			if (insize > offsize) {
+				newOffs = newOffs.keep(offsize);
+			};
+		};
+		outOffsets = newOffs;
+	}
+
 	offsetsFromProxy { |proxy|
 		var setting = proxy.getKeysValues;
 		var normVals = setting.collect { |pair|
 			proxy.getSpec(pair[0]).unmap(pair[1]);
 		};
-		^outOffsets = normVals.unibi;
+		this.outOffsets_(normVals.unibi);
+		^outOffsets;
 	}
 
 	offsetsFromPreset { |preset, setName|
@@ -393,7 +408,8 @@ Influx :InfluxBase {
 		var normVals = setting.value.collect { |pair|
 			preset.proxy.getSpec(pair[0]).unmap(pair[1]);
 		};
-		^outOffsets = normVals.unibi;
+		this.outOffsets_(normVals.unibi);
+		^outOffsets;
 	}
 
 	attachMapped { |object, funcName, paramNames, specs|
@@ -417,5 +433,7 @@ Influx :InfluxBase {
 			object.set(*mappedKeyValList.flat);
 		});
 	}
-
+	removeMapped { |funcName|
+		action.removeAt(funcName);
+	}
 }

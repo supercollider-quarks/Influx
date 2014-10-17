@@ -1,7 +1,7 @@
 TITLE:: Activity
 summary:: model activity level and its subjective decay over time.
 categories:: Influx
-related:: Classes/Influx, Classes/KtlLoop, etc.
+related:: Classes/Influx, Classes/KtlLoop
 
 DESCRIPTION::
 Activity models the decay of perceived activity level over time. Can be used to track how active some playing interface is being used, and slowly winding down a process if it gets no playing attention.
@@ -11,10 +11,10 @@ a = Activity();
 a.action = { |a| a.level.round(a.floor).postln }; // post level
 
 	// do this several times to charge up level
-a.add(1); 
+a.add(1);
 a.level;
 a.dt = 0.1; // slow down model
-a.stop;		// stop 
+a.stop;		// stop
 a.play;		// play again
 a.action = nil; // stop posting
 
@@ -99,7 +99,7 @@ ARGUMENT:: val
 the value to add
 
 METHOD:: action
-an action to perform after each calculation step. can be used for debugging, 
+an action to perform after each calculation step. can be used for debugging,
 or informing related processes about level updates.
 
 METHOD:: decay

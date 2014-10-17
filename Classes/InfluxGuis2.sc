@@ -240,13 +240,13 @@ InfluxIOWGui : JITGui {
 
 
 	makeViews { |options|
-		inValsGui = ParamGui(nil, numItems[0], zone,
+		inValsGui = EnvirGui(nil, numItems[0], zone,
 			bounds: 260 @ (numItems[0] + 1 * 20),
 			makeSkip: false,
 			options: [\name]).name_(\inVals);
 
 		wGui = InfluxWGui(nil, numItems, zone, 260 @ 200, makeSkip: false);
-		outValsGui = ParamGui(nil, numItems[1], zone,
+		outValsGui = EnvirGui(nil, numItems[1], zone,
 			bounds: 260 @ (numItems[1] + 1 * 20),
 			makeSkip: false,
 			options: [\name])
