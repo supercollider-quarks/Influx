@@ -8,7 +8,7 @@ Questions -
   It passes on incoming values under the same name,
   (puts them into outValDict - maybe remove this step?),
   and spreads them as they are to multiple destinations
-  by means of the named actions in its action, a FuncChain2.
+  by means of the named actions in its action, a MFunc.
 
 * InfluxMix can accept influences from multiple sources
   and decides on param values based on the influences.
@@ -106,7 +106,7 @@ InfluxBase {
 
 	initBase {
 		this.prepInvals;
-		action = FuncChain2.new;
+		action = MFunc.new;
 	}
 
 		// overwrite in subclasses
@@ -140,24 +140,27 @@ InfluxBase {
 		};
 	}
 
-	// interface to FuncChain:
+	// interface to MFunc:
 	// for more complex ordering, use i.action.addAfter etc.
 	add { |name, func| action.add(name, func) }
-	remove { |name| action.removeAt(name) }
-	addFunc { |func| action.addFunc(func) }
-	removeFunc { |func| action.removeFunc(func) }
+	remove { |name| action.remove(name) }
+	// no anonymous functions anymore,
+	// too clumsy to drag them along in MFunc
+	// addFunc { |func| action.addFunc(func) }
+	// removeFunc { |func| action.removeFunc(func) }
 
+	// create simple funcnames based on relevent object
 	funcName { |str, obj|
-		var objname = if (obj.respondsTo(\key)) { obj.key } { action.array.size };
+		var objname = if (obj.respondsTo(\key)) { obj.key } { action.funcDict.size };
 		^(str ++ "_" ++ objname).asSymbol;
 	}
 
+	// attach objects directly (i.e. without mapping)
 	attachSet { |object, funcName|
 		funcName = funcName ?? { this.funcName("set", object) };
 		this.add(funcName, { object.set(*this.outValDict.asKeyValuePairs) });
 	}
 
-		// attach objects directly
 	attachPut { |object, funcName|
 		funcName = funcName ?? { this.funcName("put", object) };
 		this.add(funcName, { object.putAll(outValDict); });
@@ -245,7 +248,7 @@ Influx :InfluxBase {
 
 	init { |outs|
 		this.prepInvals;
-		action = FuncChain2.new;
+		action = MFunc.new;
 		outNames = this.class.makeOutNames(outs);
 		this.calcOutVals;
 	}
@@ -434,6 +437,6 @@ Influx :InfluxBase {
 		});
 	}
 	removeMapped { |funcName|
-		action.removeAt(funcName);
+		action.disable(funcName);
 	}
 }
