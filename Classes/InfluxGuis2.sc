@@ -221,7 +221,7 @@ InfluxIOWGui : JITGui {
 		inValsGui.widgets.do { |widge|
 			if (widge.isKindOf(EZSlider)) {
 				widge.action = widge.action.addFunc({ |widge|
-					object.calcOutVals;
+					object.calcOutVals.doAction;
 				});
 			}
 		}
