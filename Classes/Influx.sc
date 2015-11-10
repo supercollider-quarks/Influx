@@ -340,6 +340,10 @@ Influx :InfluxBase {
 		.name_(name);
 	}
 
+	center {
+		this.set(*inNames.collect([_, 0]).flat);
+	}
+
 	// create new random weights
 	rand { |maxval = 1.0|
 		weights = weights.collect { |row|

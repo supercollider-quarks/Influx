@@ -38,9 +38,12 @@ a.blend([1,0.1, 0.1], 0.9).postw;
 c = InfluxKtlGui(a);
 d = InfluxIOWGui(a);
 
-a.set(\x, 0.0, \y, 0.0).postw; // set to center
-a.set(\x, 0.0, \y, 0.2).postw; // set to specific place
+a.set(\x, 0.0, \y, 0.2).postw; // set to a specific place
 a.set(\x, 1.0.rand2, \y, 1.0.rand2).postw; // jump randomly
+a.set(\x, 0.0, \y, 0.0); // set to center
+// shortcut to set to center,
+// useful with offsetsFromProxy:
+a.center;
 
 ::
 
@@ -185,7 +188,7 @@ InfluxKtlGui(a);
 
 //// more tests by code - check that new values appear
 a.set(\x, 1.0, \y, 0);
-a.set(\x, 0, \y, 0);    // go to center values
+a.center;    // go to center values
 a.set(\x, 1.0.rand2, \y, 1.0.rand2);
 
 // add an action to perform when outvals change
@@ -257,7 +260,7 @@ Ndef('a').set('dens', 535.47, 'timescale', 0.331, 'loopnode', 6.23, 'curve', 4.7
 // puts the current ndef setting in the center at 0@0:
 a.offsetsFromProxy(Ndef(\a));
 // put the controller there
-a.set(\x, 0, \y, 0);
+a.center;
 // rather wide range, setting is at center
 a.inScaler = 1;
 a.inScaler = 0.5; // smaller range, zooming in
