@@ -140,18 +140,15 @@ InfluxBase {
 		};
 	}
 
-	// interface to MFunc:
-	// for more complex ordering, use i.action.addAfter etc.
+	// basic interface to MFunc,
+	// for more complex ordering, use inph.action.addAfter etc.
 	add { |name, func| action.add(name, func) }
 	remove { |name| action.remove(name) }
-	// no anonymous functions anymore,
-	// too clumsy to drag them along in MFunc
-	// addFunc { |func| action.addFunc(func) }
-	// removeFunc { |func| action.removeFunc(func) }
 
-	// create simple funcnames based on relevent object
+	// create simple funcnames based on relevant object
 	funcName { |str, obj|
-		var objname = if (obj.respondsTo(\key)) { obj.key } { action.funcDict.size };
+		var objname = if (obj.respondsTo(\key)) {
+			obj.key } { action.funcDict.size };
 		^(str ++ "_" ++ objname).asSymbol;
 	}
 
@@ -257,7 +254,7 @@ Influx :InfluxBase {
 		outNames = outs;
 		outValDict = ();
 		outNames.do (outValDict.put(_, 0));
-		outOffsets = 0 ! outNames.size;
+		outOffsets = ();
 	}
 
 	initWeights { |argWeights|
@@ -275,7 +272,7 @@ Influx :InfluxBase {
 		weights.do { |line, i|
 			var outVal = line.sum({ |weight, j|
 				weight * (inValDict[inNames[j]] ? 0) * inScaler;
-			}) + outOffsets[i];
+			});
 			outValDict.put(outNames[i], outVal);
 		};
 	}
@@ -385,8 +382,9 @@ Influx :InfluxBase {
 		if (pre.notNil) { this.setw(pre) };
 	}
 
-	outOffsets_ { |newOffs|
-		var insize = newOffs.size, offsize = outOffsets.size;
+	setOffsets { |key, newOffs|
+		var insize = newOffs.size;
+		var offsize = outOffsets[key].size;
 		if (insize < offsize) {
 			newOffs = newOffs ++ 0.dup(offsize - insize);
 		} {
@@ -394,7 +392,7 @@ Influx :InfluxBase {
 				newOffs = newOffs.keep(offsize);
 			};
 		};
-		outOffsets = newOffs;
+		outOffsets.put(key, newOffs);
 	}
 
 	offsetsFromProxy { |proxy|
@@ -402,7 +400,7 @@ Influx :InfluxBase {
 		var normVals = setting.collect { |pair|
 			proxy.getSpec(pair[0]).unmap(pair[1]);
 		};
-		this.outOffsets_(normVals.unibi);
+		this.setOffsets(proxy.key, normVals.unibi);
 		^outOffsets;
 	}
 
@@ -411,7 +409,7 @@ Influx :InfluxBase {
 		var normVals = setting.value.collect { |pair|
 			preset.proxy.getSpec(pair[0]).unmap(pair[1]);
 		};
-		this.outOffsets_(normVals.unibi);
+		this.setOffsets(preset.proxy.key, normVals.unibi);
 		^outOffsets;
 	}
 
@@ -423,12 +421,17 @@ Influx :InfluxBase {
 		?? { object.getHalo(\orderedNames); }
 		?? { object.controlKeys; };
 
+		outOffsets.put(funcName, 0 ! outNames.size);
+
 		action.addLast(funcName, {
+			var myOffsets = outOffsets[funcName];
 			mappedKeyValList = paramNames.collect { |extParName, i|
 				var inflOutName = outNames[i];
 				var inflVal = outValDict[inflOutName];
 				var mappedVal;
+
 				if (inflVal.notNil) {
+					inflVal = inflVal + myOffsets[i];
 					mappedVal = specs[extParName].map(inflVal + 1 * 0.5);
 					[extParName, mappedVal];
 				} { [] }
@@ -436,7 +439,9 @@ Influx :InfluxBase {
 			object.set(*mappedKeyValList.flat);
 		});
 	}
+
 	removeMapped { |funcName|
 		action.disable(funcName);
 	}
+
 }
