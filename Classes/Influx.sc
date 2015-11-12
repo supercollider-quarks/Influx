@@ -228,8 +228,18 @@ InfluxBase {
 
 
 Influx :InfluxBase {
+	classvar <outFilters;
+
 	var <weights, <presets;
 	var <outOffsets, <>inScaler = 1;
+	var <outProcs;
+
+	// *initClass {
+	// 	outFilters = (
+	// 		tanh: _.tanh,
+	// 		fold: _.fold2
+	// 	)[\tanh].postcs;
+	// }
 
 	*new { |ins = 2, outs = 8, vals, weights|
 		ins = this.makeInNames(ins);
@@ -254,6 +264,7 @@ Influx :InfluxBase {
 		outNames = outs;
 		outValDict = ();
 		outNames.do (outValDict.put(_, 0));
+		outProcs = ();
 		outOffsets = ();
 	}
 
@@ -273,9 +284,12 @@ Influx :InfluxBase {
 			var outVal = line.sum({ |weight, j|
 				weight * (inValDict[inNames[j]] ? 0) * inScaler;
 			});
+			outVal = outProcs[\base].value(outVal) ? outVal;
 			outValDict.put(outNames[i], outVal);
 		};
 	}
+
+	addProc { |name, func| outProcs.put(name, func); }
 
 	makePresets {
 
@@ -417,7 +431,7 @@ Influx :InfluxBase {
 		^outOffsets;
 	}
 
-	attachMapped { |object, funcName, paramNames, specs|
+	attachMapped { |object, funcName, paramNames, specs, proc|
 		var mappedKeyValList;
 		specs = specs ?? { object.getSpec; };
 		funcName = funcName ?? { object.key };
@@ -426,9 +440,11 @@ Influx :InfluxBase {
 		?? { object.controlKeys; };
 
 		outOffsets.put(funcName, 0 ! outNames.size);
+		outProcs.put(funcName, proc);
 
 		action.addLast(funcName, {
 			var myOffsets = outOffsets[funcName];
+			var myProc = outProcs[funcName];
 			mappedKeyValList = paramNames.collect { |extParName, i|
 				var inflOutName = outNames[i];
 				var inflVal = outValDict[inflOutName];
@@ -436,6 +452,7 @@ Influx :InfluxBase {
 
 				if (inflVal.notNil) {
 					inflVal = inflVal + myOffsets[i];
+					inflVal = myProc.value(inflVal) ? inflVal;
 					mappedVal = specs[extParName].map(inflVal + 1 * 0.5);
 					[extParName, mappedVal];
 				} { [] }

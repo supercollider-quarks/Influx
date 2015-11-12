@@ -1,7 +1,7 @@
 TITLE:: Influx
 summary:: entangle control parameters in non-obvious ways
 categories:: Libraries>JITLib
-related:: Classes/Ndef, Classes/Tdef, Classes/ProxyPreset, Classes/FuncChain
+related:: Classes/Ndef, Classes/Tdef, Classes/ProxyPreset, Classes/MFunc
 
 DESCRIPTION::
 Influx explores the idea performing with running processes by means of influence on process parameters rather than direct control. It maps input values to output values by allowing every input param to influence any output param by a given weight.
@@ -184,8 +184,6 @@ d = InfluxIOWGui(a); d.skipjack.dt = 0.05;
 // recommended for direct use:
 InfluxKtlGui(a);
 
-
-
 //// more tests by code - check that new values appear
 a.set(\x, 1.0, \y, 0);
 a.center;    // go to center values
@@ -316,6 +314,39 @@ n.getSetNames.choose
 // choose a random preset
 a.offsetsFromPreset(n, n.getSetNames.choose);
 
+
+
+// Influx can process its output values:
+// as linear sums can exceed [-1, 1], params can stick there.
+// addProc allows adding processing filters to keep the
+// outvals within [-1, 1] borders in different ways.
+// e.g. use tanh to compress when approaching borders,
+// and never quite reach them
+a.addProc(\base, { |val| val.tanh });
+// fold2: bounce back at borders
+a.addProc(\base, { |val| val.fold2(1.0) });
+
+// addProc base processes basic outVals,
+// one can also process individual attached outputs:
+// remove general outVals proc
+a.addProc(\base, nil);
+
+// add one for attached Ndef(\a) - note difference
+// between outVals on influx gui and params on NdefGui
+a.addProc(\a, { |val| val.tanh });
+// boost values before tanh to push toward extremes
+a.addProc(\a, { |val| (val * 1.5).tanh });
+
+// or try folding
+a.addProc(\a, { |val| val.fold2(1.0) });
+
+// take offsets from a random preset from above:
+// outvals are processed after adding offsets.
+// note that nonlinear processing will distort the values
+// of the stored preset somewhat.
+// (this could be reverse-calculated for the filter)
+a.offsetsFromPreset(n, n.getSetNames.choose);
+a.addProc(\a, { |val| (val * 1.5).tanh });
 
 
 
