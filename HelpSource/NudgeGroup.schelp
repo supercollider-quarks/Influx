@@ -1,0 +1,99 @@
+TITLE:: NudgeGroup
+summary:: A group of Nudges for changing params of a process
+categories:: Control
+related:: Classes/Nudge, Classes/Influx, Reference/MetaControl
+
+DESCRIPTION::
+
+First code examples:
+
+code::
+
+// make a nudgeable process:
+Ndef(\a, { |freq = 200, amp = 0.1, pan = 0.0| }).gui(3);
+
+// now the nudgegroup for its 3 params
+g = NudgeGroup(Ndef(\a), Ndef(\a).controlKeys);
+g.object;
+g.params;
+g.nudgeList;
+g.nudgeDict;
+// use a single nudge
+g.at(\freq).nudge(0.1);
+g.nudgeAt(\freq, 0.1);
+
+// nudge whole group by some value
+g.nudge(0.1, 0.1, 0.1);
+
+// nudge group by unequal values
+g.nudge(0.1, -0.05, 0.03);
+
+// use an influx for the delta values
+i = Influx( 2, 3);
+i.deltaFor(0.1); // only x changes
+i.deltaFor(0.0, 0.1);  // only y changes
+i.deltaFor(0.1, -0.1);  // both x and y change
+
+// use influx for nudging:
+by influx x-axis only
+g.nudge(*i.deltaFor(0.1));
+
+// by influx y-axis only
+g.nudge(*i.deltaFor(0.0, 0.1));
+
+// by both x and y
+g.nudge(*i.deltaFor(-0.1, 0.1));
+
+g.nudge(*i.deltaFor(0.1.rand2, 0.1.rand2));
+
+
+// influence the process by 2dslider
+// - the further away from center, the bigger the deltas
+z = Slider2D().front;
+
+z.action = { |sl|
+	var x = sl.x - 0.5, y = sl.y - 0.5;
+	var scaler = 0.1;
+	g.nudge(*i.deltaFor(*[x, y]*scaler));
+};
+
+::
+
+CLASSMETHODS::
+
+METHOD:: new
+argument:: object
+argument:: params
+
+
+INSTANCEMETHODS::
+
+METHOD:: object
+
+METHOD:: nudgePairs
+argument::  ... keysDeltas
+
+METHOD:: nudgeDict
+
+METHOD:: nudgeList
+
+METHOD:: nudge
+argument::  ... deltas
+
+METHOD:: init
+
+METHOD:: at
+argument:: keyOrIndex
+
+METHOD:: nudgeAt
+argument:: keyOrIndex
+argument:: delta
+
+METHOD:: params
+
+
+EXAMPLES::
+
+code::
+_some_example_code_
+::

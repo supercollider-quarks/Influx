@@ -289,6 +289,12 @@ Influx :InfluxBase {
 		};
 	}
 
+	deltaFor { |...inDeltas|
+		^inDeltas.keep(inValDict.size).collect { |indelta, i|
+			weights.collect { |line| line[i] * indelta };
+		}.sum
+	}
+
 	addProc { |name, func| outProcs.put(name, func); }
 
 	makePresets {
@@ -465,4 +471,7 @@ Influx :InfluxBase {
 		action.disable(funcName);
 	}
 
+	attachNudge { |object, funcName, paramNames, specs, proc|
+
+	}
 }
