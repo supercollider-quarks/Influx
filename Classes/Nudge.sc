@@ -6,6 +6,7 @@ NudgeGroup {
 	}
 
 	init {
+		params = params ?? { object.controlKeys };
 		nudgeDict = ();
 		nudgeList = params.collect { |paramKey|
 			var nudge = Nudge(object, paramKey);
@@ -33,21 +34,36 @@ NudgeGroup {
 			this.nudgeAt(key, delta);
 		}
 	}
+
+	pullToward { |values, maxDelta, exp = 0.5|
+		var dists, distScaler;
+		dists = nudgeList.collect { |n, i| n.distFromUni(values[i]) };
+		if (exp >= 0) {
+			distScaler = dists.maxItem(_.abs)
+		} {
+			// arrived ones are zero, so need to filter them
+			distScaler = 1;
+			dists.do { |dist|
+				dist = dist.abs;
+				if (dist > 0) {
+					distScaler = min(distScaler, dist)
+				};
+			};
+		};
+		distScaler = distScaler.reciprocal;
+
+		nudgeList.do { |nudge, i|
+			nudge.pullToward(values[i],
+				maxDelta * (dists[i] * distScaler ** exp)
+			);
+		}
+	}
 }
 
 Nudge {
-	classvar <borderFuncs, <shapeFuncs;
 	var <>object, <>key, <>getFunc, <>setFunc;
 	var <>map2BiFunc, <>nudgeFunc, <>borderFunc, <>unmapFunc;
 	var <>state, <unival, <bival;
-
-	*initClass {
-		borderFuncs = (
-
-		);
-
-	}
-
 	*new { |obj, key|
 		^super.newCopyArgs(obj, key).init;
 	}
@@ -66,6 +82,28 @@ Nudge {
 		bival = map2BiFunc.(unival, state);
 		bival = nudgeFunc.(bival, delta, state);
 		bival = borderFunc.(bival, state) ? bival;
+		unival = unmapFunc.(bival, state);
+		setFunc.value(object, key, unival);
+	}
+
+	getUni { ^unival = getFunc.(object, key); }
+	setUni { |val| setFunc.value(object, key, val); }
+	distFromUni { |val| ^val - this.getUni; }
+
+	pullToward { |target, maxDelta = 0.02|
+		var targ2, dist, sign, delta;
+		unival = getFunc.(object, key);
+		bival = map2BiFunc.(unival, state);
+		targ2 = map2BiFunc.(target, state);
+		dist = targ2 - bival;
+
+		if (dist == 0) { ^this };
+
+		sign = (dist * state[\dir]).sign;
+		delta = min(maxDelta, dist.abs) * sign;
+		// "targ2: % curr: % dist: % sign: % delta: %\n"
+		// .postf(targ2, bival,dist, sign, delta);
+		bival = bival + delta;
 		unival = unmapFunc.(bival, state);
 		setFunc.value(object, key, unival);
 	}

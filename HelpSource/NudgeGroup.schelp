@@ -14,6 +14,9 @@ Ndef(\a, { |freq = 200, amp = 0.1, pan = 0.0| }).gui(3);
 
 // now the nudgegroup for its 3 params
 g = NudgeGroup(Ndef(\a), Ndef(\a).controlKeys);
+
+// if no params given, asks the object:
+g = NudgeGroup(Ndef(\a));
 g.object;
 g.params;
 g.nudgeList;
@@ -95,5 +98,47 @@ METHOD:: params
 EXAMPLES::
 
 code::
-_some_example_code_
+
+// an example for pullToward with groups:
+// make an object with four params
+Ndef(\y, { |a,b,c,d| });
+Ndef(\y).controlKeys.do { |key| Ndef(\y).addSpec(key, [-10, 30]); };
+Ndef(\y).gui(4);
+
+// make a nudge group for it
+g = NudgeGroup(Ndef(\y));
+
+// now set it to random values, then pull toward max:
+g.nudgeList.do { |n| n.setUni(1.0.rand) };
+g.pullToward(1!4, 0.02); // repeat until there
+
+// larger maxDelta
+g.nudgeList.do { |n| n.setUni(1.0.rand) };
+g.pullToward(1!4, 0.04); // repeat until there
+
+// linear maxDelta for all params:
+// all move with same speed, closest arrive first
+g.nudgeList.do { |n| n.setUni(1.0.rand) };
+g.pullToward(1!4, 0.04, 0.0);
+
+// proportional maxDelta for all params:
+// distance is scaled like a crossfade, all arrive at the same time
+g.nudgeList.do { |n| n.setUni(1.0.rand) };
+g.pullToward(1!4, 0.04, 1);
+
+// default 0.5 sqrt(dist) for all params:
+// closer ones are slower, but still get there first
+g.nudgeList.do { |n| n.setUni(1.0.rand) };
+g.pullToward(1!4, 0.02, 0.5);
+
+// exp of 2 for all params:
+// closer ones move superslow, distances become more similar,
+// toward the end all move at same speed
+g.nudgeList.do { |n| n.setUni(1.0.rand) };
+g.pullToward(1!4, 0.02, 2);
+
+// exp of -1 : closer get faster, further ones slow down
+g.nudgeList.do { |n| n.setUni(1.0.rand) };
+g.pullToward(1!4, 0.02, -1);
+
 ::
