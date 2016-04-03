@@ -123,5 +123,17 @@ private:: init
 EXAMPLES::
 
 code::
-_some_example_code_
+
+// pullToward method:
+
+Ndef(\x).set(\amp, 0.25).gui(1);
+n = Nudge(Ndef(\x), \amp);
+
+// move a param toward a target value, maxDelta
+n.pullToward(1.0, 0.02);
+// different aim
+n.pullToward(0.7, 0.02);
+// min value
+n.pullToward(0, 0.02);
+
 ::

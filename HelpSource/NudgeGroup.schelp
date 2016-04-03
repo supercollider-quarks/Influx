@@ -129,16 +129,16 @@ g.pullToward(1!4, 0.04, 1);
 // default 0.5 sqrt(dist) for all params:
 // closer ones are slower, but still get there first
 g.nudgeList.do { |n| n.setUni(1.0.rand) };
-g.pullToward(1!4, 0.02, 0.5);
+g.pullToward(1!4, 0.04, 0.5);
 
 // exp of 2 for all params:
 // closer ones move superslow, distances become more similar,
 // toward the end all move at same speed
 g.nudgeList.do { |n| n.setUni(1.0.rand) };
-g.pullToward(1!4, 0.02, 2);
+g.pullToward(1!4, 0.04, 2);
 
 // exp of -1 : closer get faster, further ones slow down
 g.nudgeList.do { |n| n.setUni(1.0.rand) };
-g.pullToward(1!4, 0.02, -1);
+g.pullToward(1!4, 0.04, -1);
 
 ::
