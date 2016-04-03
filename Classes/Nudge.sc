@@ -99,10 +99,7 @@ Nudge {
 
 		if (dist == 0) { ^this };
 
-		sign = (dist * state[\dir]).sign;
-		delta = min(maxDelta, dist.abs) * sign;
-		// "targ2: % curr: % dist: % sign: % delta: %\n"
-		// .postf(targ2, bival,dist, sign, delta);
+		delta = min(maxDelta, dist.abs) * dist.sign;
 		bival = bival + delta;
 		unival = unmapFunc.(bival, state);
 		setFunc.value(object, key, unival);
