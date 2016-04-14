@@ -71,7 +71,9 @@ Nudge {
 		state = (dir: 1, border: 1.0);
 		getFunc = { |obj, key| obj.getUni(key) };
 		setFunc = { |obj, key, val| obj.setUni(key, val) };
-		nudgeFunc = { |val, delta, state| (val + (delta * state[\dir])) };
+		nudgeFunc = { |val, delta, state|
+			val + (delta * state[\border] * state[\dir])
+		};
 
 		this.useLin;
 		this.useFold;
@@ -129,10 +131,10 @@ Nudge {
 	}
 
 	useTan { |drive = 5|
-		state[\border] = drive.atan;
+		state[\border] = drive;
 		state[\tanGain] = drive.atan;
 		map2BiFunc = { |val, state| (val.unibi * state[\tanGain]).tan };
-		unmapFunc = { |val, state| (val.atan / state[\border]).biuni };
+		unmapFunc = { |val, state| (val.atan / state[\tanGain]).biuni };
 	}
 
 	useSin {
@@ -142,20 +144,11 @@ Nudge {
 		unmapFunc = { |val| val.sin.biuni };
 	}
 
-
 	useBipow { |exp = 0.5|
 		state[\border] = 1;
 		state[\exp] = exp;
 		map2BiFunc = { |val, state| val.unibi.bipow(state[\exp]) };
 		unmapFunc = { |val, state| val.bipow(state[\exp].reciprocal).biuni };
 	}
-
-		// FIXME
-	// useAtan { |drive = 5|
-	// 	state[\tanGain] = drive;
-	// 	state[\border] = drive.atan;
-	// 	map2BiFunc = { |val| (val.unibi * state[\tanGain]).atan };
-	// 	unmapFunc = { |val| (val.tan / state[\border]).biuni };
-	// }
 
 }

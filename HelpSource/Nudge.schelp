@@ -32,40 +32,42 @@ Ndef(\a).setUni(\freq, 0.5);
 n = Nudge(Ndef(\a), \freq);
 
 // nudge by hand
+// by default, internal nudge range is +-1,
+// so a nudge step 0.1 is 1/20th of total range
 n.nudge(0.1);
 
-// nudge permanently
+// nudge permanently to see behavior at borders
 fork { loop { 0.1.wait; n.nudge(0.03); } };
 
 n.useWrap; // wrap at borders
 n.useClip; // or clip at borders
-n.useFold; // default - fold at borders by inverting nudge direction
+n.useFold; // default: fold at borders by inverting nudge direction
 
 
-
-// Shaping the nudge steps inside range:
+// Shaping the nudge step size inside range:
 
 // sine shaping - nudge is linear in center, small near borders
 n.useSin;
 
 // tangens shaping - nudge is bigger in center, smaller near borders
-// FIXME: this does not quite reach borders - max ca. 0.16 - 0.84
-n.useTan(5);
+n.useTan(1); // rather linear
+n.useTan(2); // compresses toward the borders
+n.useTan(5); // compresses a lot the borders
 
 // biexponential shaping
 // with exp > 1, nudge is bigger in center, smaller near borders
-// with exp < 1, nudge is smaller in center
-// FIXME: this does not quite reach borders - max ca. 0.16 - 0.84
 n.useBipow(2);
+// with exp < 1, nudge is smaller in center
 n.useBipow(0.5);
 
 
 // TODO 1 - support getVal prescale, and setVal rescale
 // e.g. get relative to center 0.7, scale by 0.6,
-// so unipolar -> [0.4 .. 1.0];
+// so unipolar is mapped into [0.4 .. 1.0];
 
-// TODO 2 - arctan shaping - nudge is small in center
-n.useAtan;
+// TODO 2 - influx may generate values quite a bit outside +-1,
+// -> figure out how best to compress them a la useTan(5)
+
 ::
 
 CLASSMETHODS::
@@ -100,7 +102,8 @@ METHOD:: useBipow
 set range shaping to bi-exponential
 
 METHOD:: getFunc, map2BiFunc, nudgeFunc, borderFunc, unmapFunc, setFunc
-The functions to use for the nudging process.
+The functions to use internally for the nudging process.
+Can also be changed individually if you know what you are doing.
 
 List::
 ## getFunc gets the param's value in unipolar range -> unival
@@ -132,7 +135,7 @@ n = Nudge(Ndef(\x), \amp);
 // move a param toward a target value, maxDelta
 n.pullToward(1.0, 0.02);
 // different aim
-n.pullToward(0.7, 0.02);
+n.pullToward(0.5, 0.02); // target is in unipolar range
 // min value
 n.pullToward(0, 0.02);
 
