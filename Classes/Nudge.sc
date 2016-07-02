@@ -64,9 +64,14 @@ Nudge {
 	var <>object, <>key, <>getFunc, <>setFunc;
 	var <>map2BiFunc, <>nudgeFunc, <>borderFunc, <>unmapFunc;
 	var <>state, <unival, <bival;
+
 	*new { |obj, key|
 		^super.newCopyArgs(obj, key).init;
 	}
+
+	storeArgs { ^[object, key] }
+	printOn { |stream| ^this.storeOn(stream) }
+
 	init {
 		state = (dir: 1, border: 1.0);
 		getFunc = { |obj, key| obj.getUni(key) };
