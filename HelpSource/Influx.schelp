@@ -1,12 +1,19 @@
 TITLE:: Influx
-summary:: entangle control parameters in non-obvious ways
+summary:: entangle control parameters for more intuitive performance
+
 categories:: Libraries>JITLib
-related:: Classes/Ndef, Classes/Tdef, Classes/ProxyPreset, Classes/MFunc
+related:: Classes/InfluxBase, Classes/InfluxMix, Classes/InfluxSpread, Classes/Idef, Classes/IMdef, Classes/ISdef, Classes/Ndef, Classes/Tdef, Classes/ProxyPreset, Classes/MFunc
 
 DESCRIPTION::
-Influx explores the idea performing with running processes by means of influence on process parameters rather than direct control. It maps input values to output values by allowing every input param to influence any output param by a given weight.
+Influx (and its named cousin, Idef) explores the idea of performing with running processes by means of influence on process parameters rather than direct control. This is a MetaControl approach. It maps input values to output values by allowing every input param to influence any output param by a given weight.
 
-Possible Scenarios :
+list::
+##InfluxBase (or also IBdef) are the base classes for all Influx variants
+##InfluxMix (or also IMdef) mix several sources into one influx;
+##InfluxSpread (or also ISdef) spread one Influx's settings to multiple destinations
+::
+
+subsection:: Typical Usage Scenarios
 
 strong::FAN IN/FAN OUT::
 
@@ -28,21 +35,22 @@ code::
 a = Influx([\x, \y], [\a, \b, \c,\d, \e, \f, \g, \h], (x: 0.5, y: 0.1));
 b = InfluxWGui(a);
 
-// randomize to  maximum bipolar value
+// randomize to a maximum bipolar value
 a.rand(0.5).postw;
 // blend toward a given array of values
 a.blend([1,0.1, 0.1, 0.5]).postw;
 a.blend([1,0.1, 0.1], 0.9).postw;
 
-// make a slider to control
+// make a control interface for it
+// x and y of the 2d slider control x and y by default
 c = InfluxKtlGui(a);
+// see the in and out values
 d = InfluxIOWGui(a);
 
 a.set(\x, 0.0, \y, 0.2).postw; // set to a specific place
 a.set(\x, 1.0.rand2, \y, 1.0.rand2).postw; // jump randomly
 a.set(\x, 0.0, \y, 0.0); // set to center
-// shortcut to set to center,
-// useful with offsetsFromProxy:
+// shortcut to set to center, useful with offsetsFromProxy:
 a.center;
 
 ::
@@ -95,7 +103,7 @@ METHOD:: inScaler
 a scaler for the input values - zooms into a smaller range around the center setting. (see examples)
 
 METHOD:: outOffsets
-by default, influences start from the center. To explore the parameter space near a given setting, one can make a bipolarized version of that setting, and set the outOffsets to it.
+by default, influences start from the center. To explore a parameter space near a given setting, one can make a bipolarized version of that setting, and set the outOffsets to it.
 See examples.
 
 subsection:: Instance Methods
@@ -107,6 +115,7 @@ private:: init, printOn, storeArgs
 
 METHOD:: plot
 plot the weights arrays with an InfluxPlot.
+code:: a.plot; ::
 
 METHOD:: set
 set input values of Influx
@@ -121,7 +130,7 @@ blend weights with other array by given factor.
 other array values will wrap as required by weights shape.
 
 METHOD:: calcOutVals
-calculate new output values and do action(s).
+calculate new output values and do the action(s).
 
 METHOD:: makePresets
 make some default presets (diagonal etc.)
@@ -130,29 +139,29 @@ METHOD:: setwPre
 set weights to preset of the given name.
 
 METHOD:: entangle
-introduce more entanglement between params
+add more entanglement between params; drift is the amount of entanglement from 0.0 to 1.0
 
 METHOD:: disentangle
 disentangle in the direction of a preset
 ARGUMENT:: blend
 by how much to disentangle
 ARGUMENT:: presetName
-name of the weights preset to disentangle towards
+name of the weights preset to disentangle towards, default is diagL
 
 METHOD:: attach
-attach an object - typically a JITLib proxy - and set its params from the Influx outputs.
+attach an object - typically a JITLib proxy like Ndef, Tdef - to set its params from the Influx outputs.
 
 ARGUMENT:: object
 the object
 
 ARGUMENT:: funcName
-a name to use in the MFunc
+a name to use in the influx action, which is an link::Classes/MFunc::.
 
 ARGUMENT:: paramNames
 paramNames to set - if none given, gets them from the object.
 
 ARGUMENT:: specs
-specs to use for mapping. If none given, those stored in the object's Halo are used.
+specs to use for mapping. If none are given, the object will be asked via code::object.getSpec::.
 
 
 
@@ -165,20 +174,13 @@ code::
 // make an influx - fan-out 2 params to 8
 a = Influx([\x, \y], [\a, \b, \c,\d, \e, \f, \g, \h], (x: 0.5, y: 0.1));
 
-// one can also give the number of ins and outs:
+// or give the number of ins and outs:
 a = Influx(2, 8);
+// or use a named Influx, an Idef:
+a = Idef(\a, 2, 8);
 
 // make plot/edit views for weights:
-// or multislider style, which I find clearer:
-c = InfluxWGui(a);
-// or weights and current IO values - recommended for debugging,
-// maybe distracting for performance
 d = InfluxIOWGui(a); d.skipjack.dt = 0.05;
-// plot style - not recommended anymore:
-/// b = InfluxPlot(a).moveTo(300, 630);
-
-// for the InfluxIOWGui, set specs for all single-letter params:
-"abcdefghijklmnopqrstuvwxyz".do { |c| Spec.add(c.asSymbol, \bipolar) };
 
 ///// interactive gui example
 // recommended for direct use:
@@ -288,7 +290,7 @@ n.addSet(\crackly);
 
 
 (
-// or add a few settings from my earlier experiments
+// or add a few settings from earlier experiments
 NdefPreset(\a).addSettings([
 ('noisy' -> [ [ 'freq', 9355.48 ], [ 'intv', -11.95 ], [ 'timescale', 0.285 ], [ 'curve', 3.938 ], [ 'loopnode', 3.052 ], [ 'dens', 534.251 ], [ 'resfreq', 859.160 ], [ 'ringtime', 0.0134 ] ]),
 ('crickety' -> [ [ 'freq', 32.366 ], [ 'intv', -5.187 ], [ 'timescale', 0.0954 ], [ 'curve', 0.2156 ], [ 'loopnode', 4.712 ], [ 'dens', 636.7 ], [ 'resfreq', 6358.147 ], [ 'ringtime', 0.964 ] ]),
@@ -348,7 +350,7 @@ a.addProc(\a, { |val| val.fold2(1.0) });
 a.offsetsFromPreset(n, n.getSetNames.choose);
 a.addProc(\a, { |val| (val * 1.5).tanh });
 
-
+a.dump
 
 // example for making a control window by hand for customization
 (
