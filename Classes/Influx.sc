@@ -1,27 +1,29 @@
-/*
+/* todo Influx:
 
-Questions -
+* implement clip, fold, wrap, compression for outvals
+(as in Nudge)
 
-  [move scaler and offsets to InfluxBase?]
+* write a method for making skewed diagonals
 
-* InfluxBase is the base class for the Influx family.
-  It passes on incoming values under the same name,
-  (puts them into outValDict - maybe remove this step?),
-  and spreads them as they are to multiple destinations
-  by means of the named actions in its action, a MFunc.
+* flexify weights
+  * allow using weights presets:
+  * make basic named ones once when called, then lookup
+  * distinguish between known and added new ones;
+  * on demand, save new weights to disk.
 
-* InfluxMix can accept influences from multiple sources
-  and decides on param values based on the influences.
-  Different sources can have different trust values,
-  which will determine the strength of their influence.
+* implement a crossfade task:
+*  xfade to new set of weights,
+*  xfade to new offsets
+*  xfade to multi-offsets,
+*   e.g. locate them at (0.5@0.5), (-0.5 @ -0.5)
+* same for 3dim controls
 
-* InfluxSpread can distribute incoming values to
-  multiple destinations, with optional rescaling,
-  and optional mapping to other parameter names.
+* Examples with Tdef, Pdef
+* Example with multitouchpad:
+*  new finger gets next ndef/tdef, 3 params (vol, x, y)
 
-* Influx can entangle or disentangle inValues to outValues
-  by means of a matrix of weights  which determine how strongly
-  a given input param will affect a given output param.
+* PresetZone - a dense field of lots of presets, morph by distance
+* PresetGrid - a grid with presets at each intersection
 
 */
 
@@ -110,8 +112,8 @@ InfluxBase {
 	}
 
 		// overwrite in subclasses
-	initOuts {
-		outNames = inNames;
+	initOuts { |argOutNames|
+		outNames = argOutNames; // here, innames
 		outValDict = ();
 	}
 
@@ -199,33 +201,6 @@ InfluxBase {
 	}
 
 }
-
-/* todo:
-
-* weight presets:
-  * make the named ones once when called, then lookup
-  * distinguish between known and added new ones;
-  * on demand save new ones to disk.
-
-* write method for making skewed diagonals
-
-* crossfade background task:
-*  xfade to new set of weights,
-*  xfade to new offsets
-*  xfade to multi-offsets,
-*   e.g. locate them at (0.5@0.5), (-0.5 @ -0.5)
-* same for 3dim controls
-
-* Examples with Tdef, Pdef
-
-* Example with multitouchpad:
-*  new finger gets next ndef/tdef, 3 params (vol, x, y)
-
-* PresetZone - a dense field of lots of presets, morph by distance
-* PresetGrid - a grid with presets at each intersection
-
-*/
-
 
 Influx :InfluxBase {
 	classvar <outFilters;

@@ -132,7 +132,7 @@ InfluxKtlGui : JITGui {
 	}
 
 	slKeydown { |char, modif|
-		thisMethod.postln;
+
 		if (object.notNil) {
 			char.switch(
 				$o, { object.rec.toggleRec },
