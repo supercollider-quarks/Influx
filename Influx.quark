@@ -4,7 +4,7 @@
 	\summary: "Lose Control, Gain Influence.",
 	\author: "Alberto de Campo",
 	\version: 1.0,
-	\dependencies: ["JITLibExtensions"],
+	\dependencies: ["JITLibExtensions", "adclib"],
 	\organization: "Institute for time-based media, UdK Berlin",
 	\since: "2013"
 )
