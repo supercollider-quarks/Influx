@@ -17,5 +17,5 @@
 + AbstractFunction {
 	unibi { arg function = 0.0, adverb; ^this.composeBinaryOp('unibi', function) }
 	biuni { arg function = 0.0, adverb; ^this.composeBinaryOp('biuni', function) }
-	biuni { arg function = 0.0, adverb; ^this.composeBinaryOp('bipow', function) }
+	bipow { arg function = 0.0, adverb; ^this.composeBinaryOp('bipow', function) }
 }
