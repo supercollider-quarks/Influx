@@ -218,11 +218,22 @@ InfluxIOWGui : JITGui {
 	}
 
 	addInvalActions {
-		inValsGui.widgets.do { |widge|
-			if (widge.isKindOf(EZSlider)) {
-				widge.action = widge.action.addFunc({ |widge|
+
+		if (inValsGui.respondsTo(\paramViews)) {
+			// new EnvirGui has paramViews
+			inValsGui.paramViews.do { |pview|
+				pview.action = pview.action.addFunc({
 					object.calcOutVals.doAction;
 				});
+			}
+		} {
+			// in case anyone old EnvirGui
+			inValsGui.widgets.do { |widge|
+				if (widge.isKindOf(EZSlider)) {
+					widge.action = widge.action.addFunc({ |widge|
+						object.calcOutVals.doAction;
+					});
+				}
 			}
 		}
 	}
@@ -233,8 +244,7 @@ InfluxIOWGui : JITGui {
 		} {
 			defPos = skin.margin;
 		};
-		minSize = 270 @ (numItems.sum + 1 * skin.buttonHeight
-		+ (skin.headHeight * 2) + 224);
+		minSize = 270 @ (numItems.sum + 1 * skin.buttonHeight + (skin.headHeight * 2) + 224);
 		//	"minSize: %\n".postf(minSize);
 	}
 
@@ -250,6 +260,6 @@ InfluxIOWGui : JITGui {
 			bounds: 260 @ (numItems[1] + 1 * 20),
 			makeSkip: false,
 			options: [\name])
-			.name_(\outVals);
+		.name_(\outVals);
 	}
 }
