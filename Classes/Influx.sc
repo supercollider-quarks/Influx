@@ -259,7 +259,7 @@ Influx :InfluxBase {
 			var outVal = line.sum({ |weight, j|
 				weight * (inValDict[inNames[j]] ? 0) * inScaler;
 			});
-			outVal = outProcs[\base].value(outVal) ? outVal;
+			outVal = outProcs[\base].value(outVal, i) ? outVal;
 			outValDict.put(outNames[i], outVal);
 		};
 	}

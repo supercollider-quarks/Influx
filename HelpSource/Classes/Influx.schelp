@@ -57,6 +57,13 @@ a.center;
 
 strong::Longer example follows below!::
 
+See also Examples folder:
+code::
+(Quark("Influx").localPath +/+ "Examples").openOS;
+// e.g. this file on output vale remapping:
+(Quark("Influx").localPath +/+ "Examples/Remap_Influx_by_envelope.scd").openOS;
+
+::
 
 CLASSMETHODS::
 
