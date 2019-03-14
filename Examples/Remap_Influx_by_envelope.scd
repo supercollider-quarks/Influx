@@ -10,7 +10,7 @@ to change at different rates in different zones of the space.
 // didactic first example, single param remapped by envelope
 
 q = q ? ();
-// envelope goes from -1 left, 0 center, 1 right,
+// simple random envelope: goes from -1 left, 0 center, 1 right,
 // random breakpoints in between
 
 q.makeEnv = { |q, numSteps = 8|
@@ -29,13 +29,41 @@ q.makeEnv = { |q, numSteps = 8|
 e = q.makeEnv; e.plot;
 
 
+///////// bit more subtle: control degree of value randomness and curvature
+q.makeEnv = { |q, numSteps = 8, rand = 1.0, maxCurve = 3.0|
+	var numTimes = numSteps.max(2).round(2).asInteger;
+	var levels = (numTimes + 1).collect { |i| 1.0.rand2.blend( (i / numTimes).unibi, 1-rand) };
+	// bit boring to have them regular
+	var times = (1/numTimes).dup(numTimes);
+	var curves = numTimes.collect { maxCurve.rand2 };
+	// put in fixed values
+	levels[0] = -1;
+	levels[numTimes div: 2] = 0;
+	levels[numTimes] = 1;
+	Env(levels, times, curves);
+};
+
+/*
+q.makeEnv(8, 0, 0).plot; // no random deviation -> straight line
+q.makeEnv(8, 0, 3.0).plot; // all points on a line, just curves
+q.makeEnv(8, 0, 8.0).plot; // strong curves
+
+q.makeEnv(8, 1.0, 0).plot; // big rand values allowed, no curves
+q.makeEnv(8, 0.5, 0).plot; // smaller rand values
+q.makeEnv(8, 0.2, 0).plot; // small rand values
+q.makeEnv(8, 0.2, 3.0).plot; // small rand values plus curves
+q.makeEnv(12, 0.5, 3.0).plot; // more steps
+*/
+
+e = q.makeEnv;
+
 //////////// simplify - single param remap
 w = Window("remap by env", Rect(400, 400, 300, 300)).front; w.addFlowLayout;
 Plotter("env", Rect(0, 0, 300, 200), w).value = e.discretize;
 x = EZSlider(w, 300@30, \ctlr, \pan, { |sl| y.value = e.at(sl.value.biuni).postln });
 y = EZSlider(w, 300@30, \mapped, \pan);
 
-Ndef(\a, { RLPF.ar(PinkNoise.ar([0.2, 0.2]), \freq.kr(400), 0.1) }).play;
+Ndef(\a, { RLPF.ar(PinkNoise.ar([0.2, 0.2]), \freq.kr(600), 0.1) }).play;
 
 x.action = { |sl|
 	var remapped = e.at(sl.value.biuni).postln;
