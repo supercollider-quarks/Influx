@@ -110,7 +110,7 @@ InfluxKtlGui : JITGui {
 
 	attachToButton { |index, proxy, mapped = true|
 		var name = proxy.key;
-		this.setButton(index, name, { |bt, modif|
+		this.setButton(index, name, { |bt, modif = 0|
 			if (bt.value > 0) {
 				if (mapped) {
 					object.attachMapped(proxy);
@@ -126,12 +126,12 @@ InfluxKtlGui : JITGui {
 	}
 
 	// could do func lookup here - maybe later
-	influxFunc { |index, butVal, modif|
+	influxFunc { |index, butVal, modif = 0|
 		// thisMethod.postln;
 		// [index, butVal, modif].postln;
 	}
 
-	slKeydown { |char, modif|
+	slKeydown { |char, modif = 0|
 
 		if (object.notNil) {
 			char.switch(
