@@ -100,7 +100,7 @@ Ndef(\a, { |freq=250, intv=19, timescale=1, curve=0, loopnode=0, dens = 10, resf
 Ndef(\a).gui.moveTo(0, 50).skipjack.dt_(0.05);
 );
 
-
+(
 ///////// make an influx and guis for it
 a = Influx(2, 8);
 
@@ -110,7 +110,7 @@ k = InfluxKtlGui(a).moveTo(0, 800);
 
 // connect the influx action to the Ndef
 a.attachMapped(Ndef(\a));
-
+)
 // -> center is all params in center
 //    x 1 y 0: is shape of x weights and vice versa
 
@@ -123,23 +123,24 @@ a.addProc(\base, { |val| val.tanh } );
 
 ////// NOW try to apply remap by semi-predictable envs:
 ////// -1, 0, 1 values remain the same
+(
 ~envs = 8.collect { q.makeEnv };
-// plot them
+// func to plot them
 q.plotenvs = { |q, envs|
 	envs.collect (_.discretize).flop.flat.plot("envs", Rect(500, 0, 300, 800), false, 8, -1, 1);
 };
-q.plotenvs(~envs);
+// q.plotenvs(~envs);
 
 // make envs with just 4 steps - every param moves faster in some areas and slower in others
 a.addHalo('envs', a.weights.collect { q.makeEnv(4) });
+// see the current envs:  3 turning points possible
 q.plotenvs(a.getHalo(\envs));
 
-// turn on envelope remapping:
+// and turn on envelope remapping:
 a.addProc(\base, { |val, i|
 	a.getHalo(\envs)[i].at(val.tanh.biuni);
 } );
-// see the current envs:  3 turning points possible
-q.plotenvs(a.getHalo(\envs));
+)
 
 // 8 steps - far more turning points of parameters in each envelope
 // -> we can access a lot more variety in the possibility space!
@@ -151,7 +152,7 @@ q.plotenvs(a.getHalo(\envs));
 a.addHalo('envs', a.weights.collect { q.makeEnv(2) });
 q.plotenvs(a.getHalo(\envs));
 
-// maybe too many already:
+// maybe too many steps already?
 // supernervous behaviour, fast change slopes everywhere
 a.addHalo('envs', a.weights.collect { q.makeEnv(12) });
 q.plotenvs(a.getHalo(\envs));
