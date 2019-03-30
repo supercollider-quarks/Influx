@@ -381,46 +381,40 @@ Influx :InfluxBase {
 		if (pre.notNil) { this.setw(pre) };
 	}
 
-	setOffsets { |key, newOffs|
-		var insize = newOffs.size;
-		var offsize = outOffsets[key].size;
-		if (insize < offsize) {
-			newOffs = newOffs ++ 0.dup(offsize - insize);
-		} {
-			if (insize > offsize) {
-				newOffs = newOffs.keep(offsize);
-			};
+	prMakeOffsetDict { |specObj, setting|
+		var offsetDict = ();
+		setting.do { |pair|
+			var key = pair[0], val = pair[1];
+			var normVal = specObj.getSpec(key).unmap(val);
+			var offsetVal = normVal.unibi;
+			offsetDict.put(key, offsetVal);
 		};
-		outOffsets.put(key, newOffs);
+		^offsetDict
 	}
 
-	offsetsFromProxy { |proxy|
-		var setting = proxy.getKeysValues;
-		var normVals = setting.collect { |pair|
-			proxy.getSpec(pair[0]).unmap(pair[1]);
-		};
-		this.setOffsets(proxy.key, normVals.unibi);
-		^outOffsets;
+	offsetsFromProxy { |proxy, controlKeys|
+		var offDict = this.prMakeOffsetDict(proxy, proxy.getKeysValues(controlKeys));
+		outOffsets.put(proxy.key, offDict);
 	}
 
 	offsetsFromPreset { |preset, setName|
-		var setting = preset.getSet(setName);
-		var normVals = setting.value.collect { |pair|
-			preset.proxy.getSpec(pair[0]).unmap(pair[1]);
-		};
-		this.setOffsets(preset.proxy.key, normVals.unibi);
-		^outOffsets;
+		var proxy = preset.proxy;
+		var offDict = this.prMakeOffsetDict(proxy, preset.getSet(setName).value);
+		outOffsets.put(proxy.key, offDict);
 	}
 
 	attachMapped { |object, funcName, paramNames, specs, proc|
 		var mappedKeyValList;
+		var offDict = ();
 		specs = specs ?? { object.getSpec; };
 		funcName = funcName ?? { object.key };
 		paramNames = paramNames
 		?? { object.getHalo(\orderedNames); }
 		?? { object.controlKeys; };
 
-		outOffsets.put(funcName, 0 ! outNames.size);
+		paramNames.do(offDict.put(_, 0));
+
+		outOffsets.put(funcName, ());
 		outProcs.put(funcName, proc);
 
 		action.addLast(funcName, {
@@ -432,7 +426,7 @@ Influx :InfluxBase {
 				var mappedVal;
 
 				if (inflVal.notNil) {
-					inflVal = inflVal + myOffsets[i];
+					inflVal = inflVal + (myOffsets[extParName] ? 0);
 					inflVal = myProc.value(inflVal) ? inflVal;
 					mappedVal = specs[extParName].map(inflVal + 1 * 0.5);
 					[extParName, mappedVal];
