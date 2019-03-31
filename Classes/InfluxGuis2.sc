@@ -199,12 +199,14 @@ InfluxIOWGui : JITGui {
 		if (newState[\object] != prevState[\object]) {
 			if (object.notNil) {
 				inValsGui.object_(object.inValDict);
+				inValsGui.orderedNames = object.inNames;
 				object.inNames.do(inValsGui.putSpec(_, \pan.asSpec));
 				this.addInvalActions;
 
 				wGui.object_(object);
 
 				outValsGui.object_(object.outValDict);
+				inValsGui.orderedNames = object.outNames;
 				object.outNames.do(outValsGui.putSpec(_, \pan.asSpec));
 				// display only!
 				outValsGui.zone.enabled_(false);
@@ -250,13 +252,13 @@ InfluxIOWGui : JITGui {
 
 
 	makeViews { |options|
-		inValsGui = EnvirGui(nil, numItems[0], zone,
+		inValsGui = ParamGui(nil, numItems[0], zone,
 			bounds: 260 @ (numItems[0] + 1 * 20),
 			makeSkip: false,
 			options: [\name]).name_(\inVals);
 
 		wGui = InfluxWGui(nil, numItems, zone, 260 @ 200, makeSkip: false);
-		outValsGui = EnvirGui(nil, numItems[1], zone,
+		outValsGui = ParamGui(nil, numItems[1], zone,
 			bounds: 260 @ (numItems[1] + 1 * 20),
 			makeSkip: false,
 			options: [\name])

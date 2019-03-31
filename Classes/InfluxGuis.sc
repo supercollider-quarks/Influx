@@ -116,10 +116,12 @@ InfluxIOGui : JITGui {
 				// plotter.specs_([\pan]).domainSpecs_([[0, object.outNames.lastIndex, \lin, 1]]);
 				// plotter.setValue(object.weights.flop, false);
 				inValsGui.object_(object.inValDict);
+				inValsGui.orderedNames_(object.inNames);
 				object.inNames.do { |name| inValsGui.specs.put(name, \pan) };
 				this.addInvalActions;
 
 				outValsGui.object_(object.outValDict);
+				outValsGui.orderedNames_(object.outNames);
 				object.outNames.do { |name|
 					outValsGui.specs.put(name, \pan) };
 			};
@@ -140,11 +142,22 @@ InfluxIOGui : JITGui {
 	}
 
 	addInvalActions {
-		inValsGui.widgets.do { |widge|
-			if (widge.isKindOf(EZSlider)) {
-				widge.action = widge.action.addFunc({ |widge|
+
+		if (inValsGui.respondsTo(\paramViews)) {
+			// new EnvirGui has paramViews
+			inValsGui.paramViews.do { |pview|
+				pview.action = pview.action.addFunc({
 					object.calcOutVals.doAction;
 				});
+			}
+		} {
+			// in case anyone old EnvirGui
+			inValsGui.widgets.do { |widge|
+				if (widge.isKindOf(EZSlider)) {
+					widge.action = widge.action.addFunc({ |widge|
+						object.calcOutVals.doAction;
+					});
+				}
 			}
 		}
 	}
@@ -165,9 +178,7 @@ InfluxIOGui : JITGui {
 
 	makeViews { |options|
 		if (options.includes(\plot)) { this.makePlotter };
-		inValsGui = EnvirGui(nil, numItems[0] + 1, zone, options: [\name]).name_(\inVals);
-		outValsGui = EnvirGui(nil, numItems[1] + 1, zone, options: [\name]).name_(\outVals);
-
-		inValsGui.valFields
+		inValsGui = ParamGui(nil, numItems[0] + 1, zone, options: [\name]).name_(\inVals);
+		outValsGui = ParamGui(nil, numItems[1] + 1, zone, options: [\name]).name_(\outVals);
 	}
 }
