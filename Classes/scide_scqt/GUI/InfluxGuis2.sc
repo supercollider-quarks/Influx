@@ -216,7 +216,7 @@ InfluxIOWGui : JITGui {
 		wGui.checkUpdate;
 		outValsGui.checkUpdate;
 
-		prevState = newState.put(\object, newState[\object].copy);
+		prevState = newState.put(\object, newState[\object]);
 	}
 
 	addInvalActions {
