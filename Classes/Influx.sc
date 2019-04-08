@@ -29,6 +29,7 @@
 
 InfluxBase {
 	classvar <outNameOrder;
+	classvar <baseSpec;
 
 	var <inNames, <inValDict, <outValDict;
 	var <outNames;
@@ -38,6 +39,7 @@ InfluxBase {
 
 	*initClass {
 		outNameOrder = [23, 24, 25] ++ (22, 21 .. 0);
+		baseSpec = [-1, 1].asSpec;
 	}
 
 	*outNameFor { |index|
@@ -85,7 +87,7 @@ InfluxBase {
 			.calcOutVals;
 	}
 
-		printOn { |receiver, stream|
+	printOn { |receiver, stream|
 		^this.storeOn(receiver, stream);
 	}
 
@@ -141,6 +143,10 @@ InfluxBase {
 			outValDict.put(key, val);
 		};
 	}
+
+	// support for getUni, RelSet, SoftSet, et al
+	get { |key| ^inValDict[key] }
+	getSpec { ^baseSpec }
 
 	// basic interface to MFunc,
 	// for more complex ordering, use inph.action.addAfter etc.
