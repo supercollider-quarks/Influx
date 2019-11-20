@@ -38,6 +38,7 @@ InfluxBase {
 	var <shape, <smallDim, <bigDim;
 
 	*initClass {
+		Class.initClassTree(Spec);
 		outNameOrder = [23, 24, 25] ++ (22, 21 .. 0);
 		baseSpec = [-1, 1].asSpec;
 	}
