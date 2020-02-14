@@ -425,7 +425,7 @@ Influx :InfluxBase {
 		var offDict = ();
 
 		// Look for specs: Passed in via param, local specs in the object or global specs defined in ControlSpec.specs
-		specs = specs ?? { object.getSpec; } ? ControlSpec.specs;
+		specs = specs ?? { this.getSpecsFor(object) };
 		funcName = funcName ?? { object.key };
 		paramNames = paramNames
 		?? { object.getHalo(\orderedNames); }
