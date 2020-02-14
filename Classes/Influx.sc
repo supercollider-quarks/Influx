@@ -439,8 +439,8 @@ Influx :InfluxBase {
 					if(specs[extParName].isNil.not) {
 						spec = specs[extParName]
 					} {
-						// Default value of spec is this generic spec
-						spec = ControlSpec(-1.0,1.0,\lin); 
+						// Default value of spec is this generic spec from the base class
+						spec = baseSpec; 
 					};
 
 
