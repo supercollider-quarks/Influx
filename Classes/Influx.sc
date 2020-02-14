@@ -148,6 +148,10 @@ InfluxBase {
 	// support for getUni, RelSet, SoftSet, et al
 	get { |key| ^inValDict[key] }
 	getSpec { ^baseSpec }
+	getSpecsFor{ |object|
+		var specs = {object.getSpec} ? ControlSpec.specs;
+		^specs
+	}
 
 	// basic interface to MFunc,
 	// for more complex ordering, use inph.action.addAfter etc.
