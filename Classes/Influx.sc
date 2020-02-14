@@ -83,6 +83,7 @@ InfluxBase {
 	*new { |inNames = 2, inValDict|
 		inNames = this.makeInNames(inNames);
 		^super.newCopyArgs(inNames, inValDict)
+			.init
 			.initBase
 			.initOuts(inNames)
 			.calcOutVals;
@@ -107,6 +108,11 @@ InfluxBase {
 				inValDict[name] = 0;
 			}
 		};
+	}
+
+	// Used in subclasses
+	init{
+
 	}
 
 	initBase {
