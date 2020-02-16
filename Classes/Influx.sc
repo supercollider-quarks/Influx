@@ -154,10 +154,6 @@ InfluxBase {
 	// support for getUni, RelSet, SoftSet, et al
 	get { |key| ^inValDict[key] }
 	getSpec { ^baseSpec }
-	getSpecsFor{ |object|
-		var specs = {object.getSpec} ? ControlSpec.specs;
-		^specs
-	}
 
 	// basic interface to MFunc,
 	// for more complex ordering, use inph.action.addAfter etc.
@@ -425,7 +421,7 @@ Influx :InfluxBase {
 		var offDict = ();
 
 		// Look for specs: Passed in via param, local specs in the object or global specs defined in ControlSpec.specs
-		specs = specs ?? { this.getSpecsFor(object) };
+		specs = specs ?? {object.getSpec} ? ControlSpec.specs;
 		funcName = funcName ?? { object.key };
 		paramNames = paramNames
 		?? { object.getHalo(\orderedNames); }
