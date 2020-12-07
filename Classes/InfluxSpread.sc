@@ -123,7 +123,7 @@ InfluxSpread : InfluxBase {
 		// this may not be the best way to do this.
 		// adding specs to destsDict.specs
 		// will write into object halo specs...
-		destDict.put(\specs, specs ?? { object.getSpec });
+		destDict.put(\specs, specs ?? { object.getSpec } ? ControlSpec.specs);		
 		destDict.put(\paramMap, paramMap);
 		destDict.put(\scaler, scaler ? 1);
 
