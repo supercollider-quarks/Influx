@@ -6,10 +6,10 @@
 * write a method for making skewed diagonals
 
 * flexify weights
-  * allow using weights presets:
-  * make basic named ones once when called, then lookup
-  * distinguish between known and added new ones;
-  * on demand, save new weights to disk.
+* allow using weights presets:
+* make basic named ones once when called, then lookup
+* distinguish between known and added new ones;
+* on demand, save new weights to disk.
 
 * implement a crossfade task:
 *  xfade to new set of weights,
@@ -83,9 +83,9 @@ InfluxBase {
 	*new { |inNames = 2, inValDict|
 		inNames = this.makeInNames(inNames);
 		^super.newCopyArgs(inNames, inValDict)
-			.initBase
-			.initOuts(inNames)
-			.calcOutVals;
+		.initBase
+		.initOuts(inNames)
+		.calcOutVals;
 	}
 
 	printOn { |receiver, stream|
@@ -114,7 +114,7 @@ InfluxBase {
 		action = MFunc.new;
 	}
 
-		// overwrite in subclasses
+	// overwrite in subclasses
 	initOuts { |argOutNames|
 		outNames = argOutNames; // here, innames
 		outValDict = ();
@@ -122,7 +122,7 @@ InfluxBase {
 
 	doAction { action.value(this) }
 
-		// set input params - ignore unknowns.
+	// set input params - ignore unknowns.
 	set { |...keyValPairs|
 		var doIt = false;
 		keyValPairs.pairsDo { |key, val|
@@ -182,8 +182,8 @@ InfluxBase {
 	detach { |name| this.remove(name); }
 
 
-		// convenience methods //
-	    // prettyprint values
+	// convenience methods //
+	// prettyprint values
 	postv { |round = 0.001|
 		var str = "\n// " + this + "\n";
 		[   ["inVals", inNames, inValDict],
@@ -228,11 +228,11 @@ Influx :InfluxBase {
 		outs = this.makeOutNames(outs);
 
 		^super.newCopyArgs(ins, vals)
-			.initBase
-			.initOuts(outs)
-			.initWeights(weights)
-			.makePresets
-			.calcOutVals;
+		.initBase
+		.initOuts(outs)
+		.initWeights(weights)
+		.makePresets
+		.calcOutVals;
 	}
 
 	init { |outs|
@@ -256,8 +256,8 @@ Influx :InfluxBase {
 			this.rand;
 		} {
 			// add size check here
-		//	if (weights.shape == [inNames.size, outNames.size])
-				weights = argWeights
+			//	if (weights.shape == [inNames.size, outNames.size])
+			weights = argWeights
 		};
 	}
 
@@ -269,6 +269,39 @@ Influx :InfluxBase {
 			outVal = outProcs[\base].value(outVal, i) ? outVal;
 			outValDict.put(outNames[i], outVal);
 		};
+	}
+
+	// use influx only for relative change vectors:
+	changeVector { |inIndices, delta = 0.1, zoom = 0.5, outIndices|
+		var changeVector;
+		var deltas = delta.asArray;
+		// for inIndices,
+		inIndices = (inIndices ?? { (0.. inNames.size-1) }).asArray;
+		outIndices =  (outIndices ?? { (0.. outNames.size-1) }).asArray;
+
+		^inIndices.collect {|inIndex|
+			// get weights, select by outIndicesNames
+			outIndices.collect { |outIndex|
+				weights[outIndex][inIndex]
+				// scale by deltas and zoom
+			} * (deltas.wrapAt(inIndex) * zoom);
+			// and add up all weights
+		}.sum
+	}
+
+	setRel { |dest, inIndices, deltas = 0.1, zoom = 0.5, params|
+		var params2use = params ?? {
+			dest.getHalo.namesToStore ?? {
+				dest.controlKeys
+			}
+		};
+		var influxOutIndices = (0..params2use.lastIndex);
+		var changeVector = this.changeVector(inIndices,
+			deltas, zoom, influxOutIndices);
+
+		params2use.do { |param, i|
+			RelSet(dest, param, changeVector[i])
+		}
 	}
 
 	deltaFor { |...inDeltas|
@@ -324,7 +357,7 @@ Influx :InfluxBase {
 		^str
 	}
 
-		// prettyprint presets
+	// prettyprint presets
 	postp { |round = 0.001|
 		var str = "// x.presets:\n(\n";
 		presets.keysValuesDo { |key, pre|
