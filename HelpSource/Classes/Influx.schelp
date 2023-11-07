@@ -155,7 +155,7 @@ by how much to disentangle
 ARGUMENT:: presetName
 name of the weights preset to disentangle towards, default is diagL
 
-METHOD:: attach
+METHOD:: attachMethod
 attach an object - typically a JITLib proxy like Ndef, Tdef - to set its params from the Influx outputs.
 
 ARGUMENT:: object
