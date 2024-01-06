@@ -83,9 +83,10 @@ InfluxBase {
 	*new { |inNames = 2, inValDict|
 		inNames = this.makeInNames(inNames);
 		^super.newCopyArgs(inNames, inValDict)
-		.initBase
-		.initOuts(inNames)
-		.calcOutVals;
+			.init
+			.initBase
+			.initOuts(inNames)
+			.calcOutVals;
 	}
 
 	printOn { |receiver, stream|
@@ -107,6 +108,11 @@ InfluxBase {
 				inValDict[name] = 0;
 			}
 		};
+	}
+
+	// Used in subclasses
+	init{
+
 	}
 
 	initBase {
@@ -446,7 +452,9 @@ Influx :InfluxBase {
 	attachMapped { |object, funcName, paramNames, specs, proc|
 		var mappedKeyValList;
 		var offDict = ();
-		specs = specs ?? { object.getSpec; };
+
+		// Look for specs: Passed in via param, local specs in the object or global specs defined in ControlSpec.specs
+		specs = specs ?? {object.getSpec} ? ControlSpec.specs;
 		funcName = funcName ?? { object.key };
 		paramNames = paramNames
 		?? { object.getHalo(\orderedNames); }
@@ -460,15 +468,27 @@ Influx :InfluxBase {
 		action.addLast(funcName, {
 			var myOffsets = outOffsets[funcName];
 			var myProc = outProcs[funcName];
+			var spec;
 			mappedKeyValList = paramNames.collect { |extParName, i|
 				var inflOutName = outNames[i];
 				var inflVal = outValDict[inflOutName];
 				var mappedVal;
 
+				// Check if spec is nil, if it is, use a generic spec for it
+					if(specs[extParName].isNil.not) {
+						spec = specs[extParName]
+					} {
+						// Default value of spec is this generic spec from the base class
+						spec = baseSpec; 
+					};
+
+
 				if (inflVal.notNil) {
 					inflVal = inflVal + (myOffsets[extParName] ? 0);
 					inflVal = myProc.value(inflVal) ? inflVal;
-					mappedVal = specs[extParName].map(inflVal + 1 * 0.5);
+
+					// Map value to Spec and return
+					mappedVal = spec.map(inflVal + 1 * 0.5);
 					[extParName, mappedVal];
 				} { [] }
 			};
