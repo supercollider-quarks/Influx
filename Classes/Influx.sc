@@ -457,11 +457,7 @@ Influx :InfluxBase {
 		// 1. Passed in via param
 		// 2. local specs in the object (if object responds to specs)
 		// 3. global specs defined in ControlSpec.specs
-		specs = if(object.respondsTo('specs'), {
-			specs ?? {object.specs} ? ControlSpec.specs;
-		}, {
-			specs ?? ControlSpec.specs;	
-		});
+		specs = specs ?? {object.tryPerform('specs')} ? ControlSpec.specs;
 		
 		funcName = funcName ?? { object.key };
 		paramNames = paramNames
