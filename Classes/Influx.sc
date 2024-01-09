@@ -453,8 +453,12 @@ Influx :InfluxBase {
 		var mappedKeyValList;
 		var offDict = ();
 
-		// Look for specs: Passed in via param, local specs in the object or global specs defined in ControlSpec.specs
-		specs = specs ?? {object.getSpec} ? ControlSpec.specs;
+		// Look for specs with priority
+		// 1. Passed in via param
+		// 2. local specs in the object (if object responds to specs)
+		// 3. global specs defined in ControlSpec.specs
+		specs = specs ?? {object.tryPerform('specs')} ? ControlSpec.specs;
+		
 		funcName = funcName ?? { object.key };
 		paramNames = paramNames
 		?? { object.getHalo(\orderedNames); }
