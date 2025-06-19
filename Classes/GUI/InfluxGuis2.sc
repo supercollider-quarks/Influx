@@ -100,7 +100,7 @@ InfluxWGui : JITGui {
 		var multiW = multiZone.bounds.width / numIns - 1;
 		var multiH = multiZone.bounds.height;
 		var gap = 1;
-		var indexSize = (multiH / numOuts).asInt - 1;
+		var indexSize = (multiH / numOuts).asInteger - 1;
 
 		multiSliders.do(_.remove);
 		multiZone.decorator.reset;

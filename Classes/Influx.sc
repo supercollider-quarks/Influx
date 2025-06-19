@@ -130,10 +130,15 @@ InfluxBase {
 
 	// set input params - ignore unknowns.
 	set { |...keyValPairs|
+		this.setByPairs(keyValPairs)
+	}
+
+	setByPairs { |keyValPairs, zoom = 1|
 		var doIt = false;
 		keyValPairs.pairsDo { |key, val|
+			if (key.isNumber) { key = inNames.wrapAt(key) };
 			if (inNames.includes(key)) {
-				inValDict.put(key, val);
+				inValDict.put(key, val * zoom);
 				doIt = true;
 			};
 		};
